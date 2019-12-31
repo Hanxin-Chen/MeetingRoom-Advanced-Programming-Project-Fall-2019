@@ -9,9 +9,10 @@ void page_welcome() {
 	cout << "----------------------------------------------\n" << endl;
 }
 
-void page_fun1(string name) {
+void page_fun1(string name,int unpaid) {
 	cout << "\n----------------------------------------------\n" << endl;
 	cout << "  您好，" + name << endl;
+	cout << "\n\t提醒：您有 " << unpaid << " 条未缴清账单！" << endl;
 	cout << "\n             请输入对应数字选择功能           \n" << endl;
 	cout << "  [1] 查询与公司信息" << endl;
 	cout << "  [2] 预约会议室" << endl;

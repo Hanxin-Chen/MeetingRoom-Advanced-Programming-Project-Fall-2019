@@ -20,7 +20,8 @@ public:
 	double operator -(Time);
 	bool operator <(Time);
 	string toString();
-
+	int setDate(string);
+	int setTime2(string);
 private:
 	int year;
 	int month;
@@ -44,6 +45,44 @@ Time::Time(string str) {
 	setTime(s1, s2);
 }
 
+int Time::setTime2(string time) {
+	if (time.size() < 5) {
+		cout << "时间格式错误！" << endl;
+		return -7;
+	}
+	string tmp;
+	tmp = time.substr(0, 2);
+	hour = stoi(tmp);
+	tmp = time.substr(3, 2);
+	minute = stoi(tmp);
+
+	if (time.size() > 5) {
+		tmp = time.substr(6, 2);
+		second = stoi(tmp);
+	}
+	else {
+		second = 0;
+	}
+	return check();
+}
+
+int Time::setDate(string date) {
+	if (date.size() != 10) {
+		cout << "日期格式错误！" << endl;
+		return -6;
+	}
+	
+	string tmp;
+	tmp = date.substr(0, 4);
+	year = stoi(tmp);
+	tmp = date.substr(5, 2);
+	month = stoi(tmp);
+	tmp = date.substr(8, 2);
+	day = stoi(tmp);
+
+	return check();
+}
+
 int Time::setTime(string date,string time) { 
 	//yyyy-mm-dd  hh:mm:ss
 	//0123-56-89  01:34:67
@@ -51,8 +90,8 @@ int Time::setTime(string date,string time) {
 		cout << "日期格式错误！" << endl;
 		return -6;
 	}
-	if (time.size() != 8) {
-		cout << "日期格式错误！" << endl;
+	if (time.size() < 5) {
+		cout << "时间格式错误！" << endl;
 		return -7;
 	}
 	string tmp;

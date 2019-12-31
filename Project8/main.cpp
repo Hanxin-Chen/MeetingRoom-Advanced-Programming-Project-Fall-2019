@@ -157,6 +157,198 @@ Time getNow() {
 	return now;
 }
 
+void editReservation(int num) {
+	Reservation curReservation = reservations[num];
+	string str,str2;
+	Time srt = curReservation.getStartTime(), end = curReservation.getEndTime();
+	double dbTmp;
+	int intTmp;
+
+	cout << "\n=========== 请填写表单(-1终止，x跳过字段) ===============" << endl;
+	cout << "============= 会议室开放时间：6:00~22:00 ================" << endl;
+	while (true) {
+		cout << "请输入预约房间号："; cin >> str;
+		if (str == "-1") {
+			cout << "\n终止修改！" << endl;
+			return;
+		}
+		if (str == "x") {
+			break;
+		}
+		if (rooms[str].getRoomId() != str) {
+			cout << "\n房间号不存在！\n" << endl;
+			continue;
+		}
+		curReservation.setRoom(rooms[str]);
+		break;
+	}
+
+	//未考虑半小时打扫卫生时间
+	while (true) {
+		cout << "请输入开始日期(yyyy-mm-dd)："; cin >> str;
+		if (str == "-1") {
+			cout << "\n终止修改！" << endl;
+			return;
+		}
+		cout << "请输入开始时间(hh:mm:ss)："; cin >> str2;
+		if (str2 == "-1") {
+			cout << "\n终止修改！" << endl;
+			return;
+		}
+
+		if (str2 == "x" && str == "x")
+			break;
+		else if (str == "x") {
+			if (srt.setTime2(str2)) {
+				continue;
+			}
+		}
+		else if (str2 == "x") {
+			if (srt.setDate(str)) {
+				continue;
+			}
+		}
+		else {
+			if (srt.setTime(str, str2)) {
+				continue;
+			}
+		}
+
+		Time now = getNow();
+		if (srt < now) {
+			cout << "\n时间错误，当前服务器时间为：" << now.toString() << endl << endl;
+			continue;
+		}
+		if (srt.getYear() == now.getYear() && srt.getMonth() == now.getMonth()
+			&& srt.getDay() == now.getDay() && srt - now < 0.5) {
+			cout << "\n不可预约半小时以内的会议室，当前服务器时间为：" << now.toString() << endl << endl;
+			continue;
+		}
+		if (srt.getHour() < 6) {
+			cout << "\n会议室在 22:00~次日6:00 不开放！\n" << endl;
+			continue;
+		}
+		if (srt.getHour() > 22) {
+			cout << "\n会议室在 22:00~次日6:00 不开放！\n" << endl;
+			continue;
+		}
+		int flag2 = 0;
+		for (int i = 0; i < reservations.size(); i++) {
+			if (i == num)
+				continue;
+			if (reservations[i].getStartTime() < srt && srt < reservations[i].getEndTime()
+				&& reservations[i].getRoom().getRoomId() == curReservation.getRoom().getRoomId()) {
+				cout << endl;
+				cout << reservations[i].getStartTime().toString() << "~"
+					<< reservations[i].getEndTime().toString() << " 时间段已被预约！\n" << endl;
+				flag2 = 1;
+				break;
+			}
+		}
+		if (!flag2)
+			break;
+	}
+
+	while (true) {
+		cout << "请输入结束日期(yyyy-mm-dd)："; cin >> str;
+		if (str == "-1") {
+			cout << "\n终止修改！" << endl;
+			return;
+		}
+		cout << "请输入结束时间(hh:mm:ss)："; cin >> str2;
+		if (str2 == "-1") {
+			cout << "\n终止修改！" << endl;
+			return;
+		}
+
+		if (str2 == "x" && str == "x")
+			break;
+		else if (str == "x") {
+			if (end.setTime2(str2)) {
+				continue;
+			}
+		}
+		else if (str2 == "x") {
+			if (end.setDate(str)) {
+				continue;
+			}
+		}
+		else {
+			if (end.setTime(str, str2)) {
+				continue;
+			}
+		}
+
+
+		if (end < srt) {
+			cout << "\n结束时间不能早于开始时间！\n" << endl;
+			continue;
+		}
+
+		if (end.getHour() < 6) {
+			cout << "\n会议室在 22:00~次日6:00 不开放！\n" << endl;
+			continue;
+		}
+		if (end.getHour() > 22) {
+			cout << "\n会议室在 22:00~次日6:00 不开放！\n" << endl;
+			continue;
+		}
+		int flag2 = 0;
+		for (int i = 0; i < reservations.size(); i++) {
+			if (i == num)
+				continue;
+			if (srt < reservations[i].getStartTime() && reservations[i].getStartTime() < end
+				&& reservations[i].getRoom().getRoomId() == curReservation.getRoom().getRoomId()) {
+				cout << endl;
+				cout << reservations[i].getStartTime().toString() << "~"
+					<< reservations[i].getEndTime().toString() << " 时间段已被预约！\n" << endl;
+				flag2 = 1;
+				break;
+			}
+		}
+		if (!flag2)
+			break;
+	}
+
+	curReservation.setStartTime(srt);
+	curReservation.setEndTime(end);
+
+	while (true) {
+		cout << "请输入人均茶歇费(￥0、￥15、￥20、￥30)：￥";
+		cin >> dbTmp;
+		if (dbTmp == -1) {
+			cout << "\n终止修改！" << endl;
+			return;
+		}
+		if (dbTmp != 0 && dbTmp != 15 && dbTmp != 20 && dbTmp != 30) {
+			cout << "\n暂不提供该服务档次！\n" << endl;
+			continue;
+		}
+		curReservation.setServiceFee(dbTmp);
+		break;
+	}
+
+
+	while (true) {
+		cout << "房间容量：" << curReservation.getRoom().getCapacity() << "，请输入需要准备的拼装水数量：";
+		cin >> intTmp;
+		if (intTmp == -1) {
+			cout << "\n终止修改！" << endl;
+			return;
+		}
+		if (intTmp < 0) {
+			cout << "\n数量错误！\n" << endl;
+			continue;
+		}
+		curReservation.setBottleNumber(intTmp);
+		break;
+	}
+
+	reservations[num] = curReservation;
+	reservations[num].updateDB(mysql);
+	cout << "=========================================================" << endl;
+}
+
 /////////////////////////////// 公司专员 /////////////////////////////////
 
 void modifyCompanyInfo(Company& com) {
@@ -238,9 +430,9 @@ void queryBill(Company com) {
 			Reservation tmp = res[i].second;
 			cout << res[i].first<< "\t";
 			cout << tmp.getRoom().getRoomId() << "\t";
-			cout << tmp.getStartTime().toString() << "\t";
-			cout << tmp.getEndTime().toString() << "\t";
-			cout << tmp.getServiceFee() << "\t";
+			cout <<left<<setw(20)<< tmp.getStartTime().toString() << "\t";
+			cout <<left<<setw(20)<< tmp.getEndTime().toString() << "\t";
+			cout << fixed << showpoint << setprecision(2) << tmp.getServiceFee() << "\t";
 			cout << tmp.getBottleNumber() << "\t";
 			cout << "￥" << fixed << showpoint << setprecision(2)<<tmp.calTotal() << endl;
 		}
@@ -322,7 +514,7 @@ void makeReservation(Company com) {
 				break;
 			}
 			if (rooms[str].getRoomId()!=str) {
-				cout << "\n房间号不能存在！\n" << endl;
+				cout << "\n房间号不存在！\n" << endl;
 				continue;
 			}
 			room = rooms[str];
@@ -473,7 +665,75 @@ void makeReservation(Company com) {
 		cout << "预约成功！" << endl;
 		cout << room.getRoomId() << " 房间，" << srt.toString() << "~" << end.toString() << endl;
 		cout << "房间密码：" << password << endl;
+		unpaid_flag++;
 		break;
+	}
+	
+}
+
+void queryReservation(Company com) {
+	vector<pair<int, Reservation> >res;
+	map<int, int> vis;
+	Time now = getNow();
+	char choice;
+
+	for (int i = 0; i < reservations.size(); i++) {
+		if (reservations[i].getCompany().getCompanyName() == com.getCompanyName()
+			&& now < reservations[i].getStartTime()) {
+			res.push_back({ i,reservations[i] });
+			vis[i] = 1;
+		}
+	}
+	if (res.size() == 0) {
+		cout << "----------------------------------------------\n" << endl;
+		cout << "                 您没有预约信息               \n" << endl;
+		cout << "----------------------------------------------\n" << endl;
+		return;
+	}
+	cout << "-------------------------------------------------------------------------------------------------------------" << endl;
+	cout << "编号\t房间号\t开始时间\t\t结束时间\t\t茶歇费\t瓶装水\t预约费\t\t缴费状态" << endl;
+	cout << "-------------------------------------------------------------------------------------------------------------" << endl;
+	for (int i = 0; i < res.size(); i++) {
+		Reservation tmp = res[i].second;
+		cout << res[i].first << "\t";
+		cout << tmp.getRoom().getRoomId() << "\t";
+		cout << left << setw(20) << tmp.getStartTime().toString() << "\t";
+		cout << left << setw(20) << tmp.getEndTime().toString() << "\t";
+		cout << fixed << showpoint << setprecision(2) << tmp.getServiceFee() << "\t";
+		cout << tmp.getBottleNumber() << "\t";
+		cout << "￥" << fixed << showpoint << setprecision(2) << tmp.calTotal() << "\t";
+		if (tmp.getPaidFlag() == 0)
+			cout << "未缴";
+		else
+			cout << "已缴";
+		cout << endl;
+	}
+	cout << "\n-------------------------------------------------------------------------------------------------------------" << endl;
+
+	cout << "\n是否修改预约信息？[Y/N] "; cin >> choice;
+	if (choice != 'Y' && choice != 'y') {
+		return;
+	}
+
+	while (true) {
+		int tmp;
+		cout << "\n请输入需要修改的编号（-1终止修改）："; cin >> tmp;
+		if (tmp == -1) {
+			cout << "\n终止修改！" << endl;
+			break;
+		}
+		if (vis[tmp] == 0) {
+			cout << "编号错误，请重新输入！" << endl;
+			continue;
+		}
+		editReservation(tmp);
+		cout << "\n预约信息修改成功！" << endl;
+		vis[tmp] = 0;
+
+		cout << "\n是否继续修改预约信息？[Y/N] "; cin >> choice;
+		if (choice != 'Y' && choice != 'y') {
+			break;
+		}
 	}
 	
 }
@@ -508,7 +768,7 @@ void function_choose2() {
 	
 	int choice = 0;
 	while (choice != -1) {
-		page_fun1(cur_name);
+		page_fun1(cur_name,unpaid_flag);
 		cin >> choice;
 		switch (choice)
 		{
@@ -517,6 +777,8 @@ void function_choose2() {
 		case 2:makeReservation(cur_company);
 			break;
 		case 3:queryBill(cur_company);
+			break;
+		case 4:queryReservation(cur_company);
 			break;
 		case -1:break;
 		default:

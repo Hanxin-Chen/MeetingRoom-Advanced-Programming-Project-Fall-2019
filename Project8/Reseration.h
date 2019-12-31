@@ -12,7 +12,7 @@ using namespace std;
 class Reservation
 {
 public:
-	Reservation(Company,Room,Time,Time,string="",double=0,int=0,int=0,int=0);
+	Reservation(Company,Room,Time,Time,string="999999",double=0,int=0,int=0,int=0);
 	double calTotal();
 	
 	void setStartTime(Time st) { startTime = st; }
