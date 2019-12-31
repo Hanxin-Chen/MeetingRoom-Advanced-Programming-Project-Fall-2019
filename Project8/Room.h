@@ -15,6 +15,7 @@ public:
 	int getCapacity();
 	double getRent();
 	void updateDB(MYSQL&);
+	void insertDB(MYSQL&);
 	//void print();
 
 private:
@@ -57,5 +58,11 @@ void Room::updateDB(MYSQL &mysql) {
 	string statement = "update room set rent="+to_string(rent)+", capacity="+to_string(capacity)+" where rid="+roomId;
 	mysql_query(&mysql, (char*)statement.c_str());
 }
+
+void Room::insertDB(MYSQL &mysql) {
+	string statement = "insert into room (rid,capacity,rent) values('"+roomId+"','" + to_string(capacity) + "', '" + to_string(rent) + "')";
+	mysql_query(&mysql, (char*)statement.c_str());
+}
+
 
 #endif // !ROOM_H

@@ -236,11 +236,23 @@ void editReservation(int num) {
 		for (int i = 0; i < reservations.size(); i++) {
 			if (i == num)
 				continue;
-			if (reservations[i].getStartTime() < srt && srt < reservations[i].getEndTime()
-				&& reservations[i].getRoom().getRoomId() == curReservation.getRoom().getRoomId()) {
+
+			if (reservations[i].getRoom().getRoomId() != curReservation.getRoom().getRoomId()) {
+				continue;
+			}
+
+			if (reservations[i].getStartTime() < srt && srt < reservations[i].getEndTime()) {
 				cout << endl;
 				cout << reservations[i].getStartTime().toString() << "~"
 					<< reservations[i].getEndTime().toString() << " 时间段已被预约！\n" << endl;
+				flag2 = 1;
+				break;
+			}
+			if (fabs(reservations[i].getStartTime() - srt) < 0.5
+				|| fabs(srt - reservations[i].getEndTime()) < 0.5) {
+				cout << endl;
+				cout << reservations[i].getStartTime().toString() << "~"
+					<< reservations[i].getEndTime().toString() << " 时间段已被预约,需要30分钟打扫时间！\n" << endl;
 				flag2 = 1;
 				break;
 			}
@@ -297,11 +309,21 @@ void editReservation(int num) {
 		for (int i = 0; i < reservations.size(); i++) {
 			if (i == num)
 				continue;
-			if (srt < reservations[i].getStartTime() && reservations[i].getStartTime() < end
-				&& reservations[i].getRoom().getRoomId() == curReservation.getRoom().getRoomId()) {
+			if (reservations[i].getRoom().getRoomId() != curReservation.getRoom().getRoomId()) {
+				continue;
+			}
+			if (srt < reservations[i].getStartTime() && reservations[i].getStartTime() < end) {
 				cout << endl;
 				cout << reservations[i].getStartTime().toString() << "~"
 					<< reservations[i].getEndTime().toString() << " 时间段已被预约！\n" << endl;
+				flag2 = 1;
+				break;
+			}
+			if (fabs(reservations[i].getStartTime() - end) < 0.5
+				|| fabs(end - reservations[i].getEndTime()) < 0.5) {
+				cout << endl;
+				cout << reservations[i].getStartTime().toString() << "~"
+					<< reservations[i].getEndTime().toString() << " 时间段已被预约,需要30分钟打扫时间！\n" << endl;
 				flag2 = 1;
 				break;
 			}
@@ -522,7 +544,7 @@ void makeReservation(Company com) {
 		}
 		if (flag)
 			break;
-		//未考虑半小时打扫卫生时间
+		
 		while (true){
 			cout << "请输入开始日期(yyyy-mm-dd)："; cin >> str;
 			if (str == "-1") {
@@ -557,11 +579,22 @@ void makeReservation(Company com) {
 			}
 			int flag2 = 0;
 			for (int i = 0; i < reservations.size(); i++){
-				if (reservations[i].getStartTime() < srt && srt < reservations[i].getEndTime()
-					&& reservations[i].getRoom().getRoomId()==room.getRoomId()) {
+				if (reservations[i].getRoom().getRoomId() != room.getRoomId()) {
+					continue;
+				}
+
+				if (reservations[i].getStartTime() < srt && srt < reservations[i].getEndTime()) {
 					cout << endl;
 					cout << reservations[i].getStartTime().toString() << "~"
 						<< reservations[i].getEndTime().toString() << " 时间段已被预约！\n" << endl;
+					flag2 = 1;
+					break;
+				}
+				if (fabs(reservations[i].getStartTime() - srt) < 0.5
+					||fabs(srt-reservations[i].getEndTime())<0.5) {
+					cout << endl;
+					cout << reservations[i].getStartTime().toString() << "~"
+						<< reservations[i].getEndTime().toString() << " 时间段已被预约,需要30分钟打扫时间！\n" << endl;
 					flag2 = 1;
 					break;
 				}
@@ -602,11 +635,21 @@ void makeReservation(Company com) {
 			}
 			int flag2 = 0;
 			for (int i = 0; i < reservations.size(); i++) {
-				if (srt<reservations[i].getStartTime() && reservations[i].getStartTime()<end
-					&& reservations[i].getRoom().getRoomId() == room.getRoomId()) {
+				if (reservations[i].getRoom().getRoomId() != room.getRoomId()) {
+					continue;
+				}
+				if (srt<reservations[i].getStartTime() && reservations[i].getStartTime()<end) {
 					cout << endl;
 					cout << reservations[i].getStartTime().toString() << "~"
 						<< reservations[i].getEndTime().toString() << " 时间段已被预约！\n" << endl;
+					flag2 = 1;
+					break;
+				}
+				if (fabs(reservations[i].getStartTime() - end) < 0.5
+					|| fabs(end - reservations[i].getEndTime()) < 0.5) {
+					cout << endl;
+					cout << reservations[i].getStartTime().toString() << "~"
+						<< reservations[i].getEndTime().toString() << " 时间段已被预约,需要30分钟打扫时间！\n" << endl;
 					flag2 = 1;
 					break;
 				}
@@ -649,6 +692,7 @@ void makeReservation(Company com) {
 		if (flag)
 			break;
 
+		srand(time(0));
 		password = "";
 		tmp = rand() % 10; password += to_string(tmp);
 		tmp = rand() % 10; password += to_string(tmp);
@@ -739,12 +783,323 @@ void queryReservation(Company com) {
 }
 
 /////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////// 管理员 /////////////////////////////////
+void addRoom() {
+	Room curRoom;
+	string roomNumber;
+	string str;
+	cout << "================== 新增会议室(-1终止) ===================" << endl;
+	while (true) {
+		cout << "请输入房间号："; cin >> roomNumber;
+		if (roomNumber == "-1") {
+			cout << "\n修改终止！" << endl;
+			return;
+		}
+		if (rooms[roomNumber].getRoomId() != "") {
+			cout << "\n输入的房间号已存在！\n" << endl;
+			continue;
+		}
+		else {
+			curRoom.setRoomId(roomNumber);
+			break;
+		}
+	}
+
+	while (true) {
+		int cap;
+		cout << "请输入房间容量："; cin >> cap;
+		if (cap == -1) {
+			cout << "\n修改终止！" << endl;
+			return;
+		}
+		if (cap < 0) {
+			cout << "\n容量错误，请重新输入！" << endl;
+			continue;
+		}
+		else {
+			curRoom.setCapacity(cap);
+			break;
+		}
+	}
+
+	while (true) {
+		double rent;
+		cout << "请房间价格：￥"; cin >> rent;
+		if (rent == -1) {
+			cout << "\n修改终止！" << endl;
+			return;
+		}
+		if (rent < 0) {
+			cout << "\n金额错误，请重新输入！" << endl;
+			continue;
+		}
+		else {
+			curRoom.setRent(rent);
+			break;
+		}
+	}
+
+	rooms[roomNumber] = curRoom;
+	rooms[roomNumber].insertDB(mysql);
+
+	cout << "=========================================================\n" << endl;
+	cout << "新增会议室成功！" << endl;
+	return;
+}
+
+void delRoom() {
+	char choice;
+	string roomNumber;
+	while (true){
+		cout << "\n请输入需要删除的房间号(-1终止操作)："; cin >> roomNumber;
+		if (roomNumber == "-1") {
+			cout << "\n修改终止！\n" << endl;
+			return;
+		}
+		if (rooms[roomNumber].getRoomId() == "") {
+			cout << "\n输入的房间号不存在！\n" << endl;
+			continue;
+		}
+		break;
+	}
+	cout << "\n是否删除 " << roomNumber << " 房间？ [Y/N] "; cin >> choice;
+	
+	for (int i = 0; i < reservations.size(); i++) {
+		if (roomNumber == reservations[i].getRoom().getRoomId()) {
+			cout << "\n当前房间已存在预约信息，不可删除！\n" << endl;
+			return;
+		}
+	}
+	
+	if (choice != 'Y'&&choice != 'y') {
+		cout << "\n放弃删除！\n" << endl;
+		return;
+	}
+	string statement = "delete from room where rid =" + roomNumber;
+	mysql_query(&mysql, (char*)statement.c_str());
+	room_ini(mysql);
+}
+
+void editRoom() {
+	Room curRoom;
+	string roomNumber;
+	string str;
+	cout << "================== 请填写表单(-1终止) ===================" << endl;
+	while (true){
+		cout << "请输入房间号："; cin >> roomNumber;
+		if (roomNumber == "-1") {
+			cout << "\n修改终止！" << endl;
+			return;
+		}
+		if (rooms[roomNumber].getRoomId() == "") {
+			cout << "\n输入的房间号不存在！\n" << endl;
+			continue;
+		}
+		else {
+			curRoom = rooms[roomNumber];
+			break;
+		}
+	}
+
+	while (true){
+		int cap;
+		cout <<"当前容量为："<<curRoom.getCapacity()<< "，请输入修改后房间容量："; cin >> cap;
+		if (cap == -1) {
+			cout << "\n修改终止！" << endl;
+			return;
+		}
+		if (cap < 0) {
+			cout << "\n容量错误，请重新输入！" << endl;
+			continue;
+		}
+		else {
+			curRoom.setCapacity(cap);
+			break;
+		}
+	}
+
+	while (true){
+		double rent;
+		cout << "当前价格为：￥" << curRoom.getRent() << "/小时，请输入修改后房间价格：￥"; cin >> rent;
+		if (rent == -1) {
+			cout << "\n修改终止！" << endl;
+			return;
+		}
+		if (rent < 0) {
+			cout << "\n金额错误，请重新输入！" << endl;
+			continue;
+		}
+		else {
+			curRoom.setRent(rent);
+			break;
+		}
+	}
+
+	rooms[roomNumber] = curRoom;
+	rooms[roomNumber].updateDB(mysql);
+
+	cout << "=========================================================\n" << endl;
+	cout << "房间信息修改成功！" << endl;
+	return;
+}
+
+void queryRoom() {
+	Room curRoom;
+	map<string, Room>::iterator it;
+	char choice;
+
+	cout << endl;
+	cout << "----------------------------------------------------" << endl;
+	cout << "房间号\t容量\t租金" << endl;
+	cout << "----------------------------------------------------" << endl;
+	for (it = rooms.begin(); it != rooms.end(); it++) {
+		if (it->second.getRoomId() == "")
+			continue;
+		cout << it->second.getRoomId() << "\t";
+		cout << it->second.getCapacity() << "\t";
+		cout << "￥" << fixed << showpoint << setprecision(2) << it->second.getRent() << "\t" << endl;
+	}
+	cout << "----------------------------------------------------\n" << endl;
+
+	cout << "是否修改房间信息？ [Y/N] "; cin >> choice;
+	if (choice != 'Y' &&choice != 'y')
+		return;
+	while (true){
+		editRoom();
+		cout << "是否继续修改？ [Y/N] "; cin >> choice;
+		if (choice != 'Y' &&choice != 'y')
+			break;
+	}
+
+}
+
+void ReservationFilter(){
+	string company;
+	string room;
+	Time srt("1970-01-01 00:00:00"), end("9999-01-01 00:00:00");
+	string str1, str2;
+	double paid = 0, unpay = 0;
+	vector<pair<int, Reservation> >res;
+	cout << "================== 请填写筛选条件(x跳过字段) ===================" << endl;
+	cout << "公司名："; cin >> company;
+	cout << "房间号："; cin >> room;
+	cout << "开始日期与时间(yyyy-mm-dd hh:mm:dd)："; cin >> str1;
+	if (str1 != "x") {
+		cin >> str2;
+		srt.setTime(str1, str2);
+	}
+	cout << "结束日期与时间(yyyy-mm-dd hh:mm:dd)："; cin >> str1;
+	if (str1 != "x") {
+		cin >> str2;
+		end.setTime(str1, str2);
+	}
+	cout << "================================================================\n" << endl;
+	
+	for (int i = 0; i < reservations.size(); i++) {
+		if (company != "x"&&company != reservations[i].getCompany().getCompanyName())
+			continue;
+		if (room != "x"&&room != reservations[i].getRoom().getRoomId())
+			continue;
+		if (reservations[i].getStartTime() < srt)
+			continue;
+		if (end < reservations[i].getEndTime())
+			continue;
+		res.push_back({ i,reservations[i] });
+	}
+	cout << "筛选结果如下：" << endl;
+	cout << "-------------------------------------------------------------------------------------------------------------" << endl;
+	cout << "编号\t公司\t房间号\t开始时间\t\t结束时间\t\t茶歇费\t瓶装水\t预约费\t\t缴费状态" << endl;
+	cout << "-------------------------------------------------------------------------------------------------------------" << endl;
+	for (int i = 0; i < res.size(); i++) {
+		Reservation tmp = res[i].second;
+		cout << res[i].first << "\t";
+		cout << tmp.getCompany().getCompanyName() << "\t";
+		cout << tmp.getRoom().getRoomId() << "\t";
+		cout << left << setw(20) << tmp.getStartTime().toString() << "\t";
+		cout << left << setw(20) << tmp.getEndTime().toString() << "\t";
+		cout << fixed << showpoint << setprecision(2) << tmp.getServiceFee() << "\t";
+		cout << tmp.getBottleNumber() << "\t";
+		cout << "￥" << fixed << showpoint << setprecision(2) << tmp.calTotal() << "\t";
+		if (tmp.getPaidFlag() == 0) {
+			cout << "未缴";
+			unpay += tmp.calTotal();
+		}
+		else {
+			cout << "已缴";
+			paid += tmp.calTotal();
+		}
+		cout << endl;
+	}
+	cout << "\n-------------------------------------------------------------------------------------------------------------" << endl;
+	cout << "\t收入：￥" << paid << "，未结清费用：￥" << unpay << endl << endl;
+	
+}
+
+void queryAll() {
+
+	double paid=0, unpay=0;
+	char choice;
+	cout << "-------------------------------------------------------------------------------------------------------------" << endl;
+	cout << "编号\t公司\t房间号\t开始时间\t\t结束时间\t\t茶歇费\t瓶装水\t预约费\t\t缴费状态" << endl;
+	cout << "-------------------------------------------------------------------------------------------------------------" << endl;
+	for (int i = 0; i < reservations.size(); i++) {
+		Reservation tmp = reservations[i];
+		cout << i << "\t";
+		cout << tmp.getCompany().getCompanyName() << "\t";
+		cout << tmp.getRoom().getRoomId() << "\t";
+		cout << left << setw(20) << tmp.getStartTime().toString() << "\t";
+		cout << left << setw(20) << tmp.getEndTime().toString() << "\t";
+		cout << fixed << showpoint << setprecision(2) << tmp.getServiceFee() << "\t";
+		cout << tmp.getBottleNumber() << "\t";
+		cout << "￥" << fixed << showpoint << setprecision(2) << tmp.calTotal() << "\t";
+		if (tmp.getPaidFlag() == 0){
+			cout << "未缴";
+			unpay += tmp.calTotal();
+		}
+		else{
+			cout << "已缴";
+			paid += tmp.calTotal();
+		}
+		cout << endl;
+	}
+	cout << "\n-------------------------------------------------------------------------------------------------------------" << endl;
+	cout << "\t收入：￥" << paid << "，未结清费用：￥" << unpay << endl << endl;
+	cout << "\t是否进入筛选模式？ [Y/N] "; cin >> choice;
+	if (choice == 'y' || choice == 'Y') {
+		while (true){
+			ReservationFilter();
+			cout << "\t是否继续查询？ [Y/N] "; cin >> choice;
+			if (choice != 'y' || choice != 'Y') {
+				break;
+			}
+		}
+		
+	}
+}
+/////////////////////////////////////////////////////////////////////////
 void function_choose1() {
 	int choice = 0;
 	while (choice != -1) {
 		page_fun2(cur_name);
 		cin >> choice;
+		switch (choice)
+		{
+		case 1:queryRoom();
+			break;
+		case 2:addRoom();
+			break;
+		case 3:delRoom();
+			break;
+		case 4:queryAll();
+			break;
+		case -1:break;
+		default:
+			cout << "未找到此功能，请重新输入！" << endl;
+			break;
+		}
 	}
+
 }
 
 void function_choose2() {
@@ -809,6 +1164,7 @@ int main(void)
 	case 1: function_choose1();
 		break;
 	case 2:function_choose2();
+		break;
 	default:
 		break;
 	}
